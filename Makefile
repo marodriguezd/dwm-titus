@@ -511,6 +511,9 @@ check-quickshell-panel-menus: dwm
 check-quickshell-panel-settings:
 	tests/test-quickshell-panel-settings.sh
 
+check-quickshell-workspace-switch:
+	tests/test-quickshell-workspace-switch.sh
+
 check-accessibility:
 	tests/test-dwm-accessibility-settings.sh
 	tests/test-quickshell-accessibility.sh
@@ -751,6 +754,7 @@ check: check-picom check-picom-xvfb
 	$(MAKE) check-quickshell-large-surfaces-xvfb
 	$(MAKE) check-quickshell-panel-menus
 	$(MAKE) check-quickshell-panel-settings
+	$(MAKE) check-quickshell-workspace-switch
 	$(MAKE) check-accessibility
 	$(MAKE) check-quickshell-command-menu
 	$(MAKE) check-quickshell-qml

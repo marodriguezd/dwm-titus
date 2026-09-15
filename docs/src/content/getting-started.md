@@ -27,7 +27,8 @@ Press <kbd>Super</kbd> + <kbd>/</kbd> at any time to open the interactive keybin
 
 ## Switching Tags (Workspaces)
 
-Tags 1-9 act as workspaces. Use `Super` + a number from `1` through `9` to switch.
+Tags 1-9 act as workspaces. Use `Super` + a number from `1` through `9` to switch,
+or click a tag number in the top panel.
 `Super` + `0` shows windows from all nine tags at once; `0` is not a tenth tag.
 
 | Action | Keys |

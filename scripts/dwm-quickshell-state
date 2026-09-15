@@ -220,11 +220,16 @@ switch_workspace() {
 		return 2
 		;;
 	esac
-	command -v wmctrl >/dev/null 2>&1 || {
-		printf 'wmctrl is required for workspace switching\n' >&2
+	if command -v wmctrl >/dev/null 2>&1; then
+		wmctrl -s "$target"
+	elif command -v xdotool >/dev/null 2>&1; then
+		# xdotool is already a required runtime dependency and dwm
+		# answers the _NET_CURRENT_DESKTOP client message with view().
+		xdotool set_desktop "$target"
+	else
+		printf '%s: neither wmctrl nor xdotool is available; install xdotool for workspace switching\n' "$0" >&2
 		return 127
-	}
-	wmctrl -s "$target"
+	fi
 }
 
 focus_window() {
@@ -236,7 +241,16 @@ focus_window() {
 		return 2
 		;;
 	esac
-	wmctrl -ia "$target"
+	if command -v wmctrl >/dev/null 2>&1; then
+		wmctrl -ia "$target"
+	elif command -v xdotool >/dev/null 2>&1; then
+		# dwm only marks windows urgent on _NET_ACTIVE_WINDOW, so raise
+		# and focus directly with the already-required xdotool instead.
+		xdotool windowraise "$target" windowfocus "$target"
+	else
+		printf '%s: neither wmctrl nor xdotool is available; install xdotool for window focus\n' "$0" >&2
+		return 127
+	fi
 }
 
 case ${1:-state} in
