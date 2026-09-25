@@ -1135,6 +1135,17 @@ ShellRoot {
         panelWindow: root.activePanelWindow
     }
 
+    IpcHandler {
+        target: "osd"
+
+        function showBrightness(valuePercent: int, subtitle: string): void {
+            const instances = brightnessOsdVariants.instances;
+            for (let i = 0; i < instances.length; i++) {
+                instances[i].show(valuePercent, subtitle);
+            }
+        }
+    }
+
     Variants {
         id: panelVariants
 
@@ -1219,5 +1230,14 @@ ShellRoot {
         panelSettingsModel: panelSettingsModel
         systemManagementModel: systemManagementModel
         desktopUpdateModel: desktopUpdateModel
+    }
+
+    Variants {
+        id: brightnessOsdVariants
+
+        model: Quickshell.screens
+
+        BrightnessOsd {
+        }
     }
 }
