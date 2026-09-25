@@ -5,53 +5,48 @@ import qs.core
 pragma ComponentBehavior: Bound
 
 // Overlay OSD for brightness feedback, shown via `quickshell ipc call osd showBrightness`.
-// Floating centered near the bottom; never grabs focus or input.
-PanelWindow {
+// Uses PopupWindow (override-redirect on X11) so dwm never manages/tiles it:
+// always on top, zero impact on the tiling layout.
+PopupWindow {
     id: root
 
-    required property var modelData
-
-    readonly property int osdWidth: Theme.scaledSize(220)
-    readonly property int osdHeight: Theme.scaledSize(64)
-    readonly property int bottomMargin: Theme.scaledSize(90)
-
-    function show(valuePercent, subtitleText) {
-        const clamped = Math.max(0, Math.min(100, Math.round(valuePercent)));
-        root.value = clamped;
-        root.subtitle = subtitleText && subtitleText.length > 0 ? subtitleText : "Brillo";
-        root.visibleState = true;
-        hideTimer.restart();
-    }
+    required property var panelWindow
 
     property int value: 0
     property string subtitle: "Brillo"
-    property bool visibleState: false
+    property bool shown: false
 
-    screen: modelData
-    visible: visibleState
-    color: "transparent"
+    readonly property int osdWidth: Theme.scaledSize(220)
+    readonly property int osdHeight: Theme.scaledSize(64)
+    readonly property int topOffset: Theme.scaledSize(80)
 
-    anchors {
-        top: false
-        bottom: true
-        left: true
-        right: true
+    function show(valuePercent, subtitleText) {
+        if (!root.panelWindow) return;
+        const clamped = Math.max(0, Math.min(100, Math.round(valuePercent)));
+        root.value = clamped;
+        root.subtitle = subtitleText && subtitleText.length > 0 ? subtitleText : "Brillo";
+        root.shown = true;
+        hideTimer.restart();
     }
 
-    margins {
-        bottom: bottomMargin
-    }
-
-    exclusionMode: ExclusionMode.Ignore
-
-    // Empty input region: fully click-through.
+    visible: shown
+    color: Theme.transparent
     mask: Region {}
+    implicitWidth: osdWidth
+    implicitHeight: osdHeight
+
+    anchor.window: root.panelWindow
+    anchor.rect.x: Math.round((root.panelWindow.width - root.osdWidth) / 2)
+    anchor.rect.y: Theme.panelHeight + root.topOffset
+    // Fedora Quickshell qmltypes omit Edges::Flags. Keep these valid runtime flags.
+    anchor.edges: Edges.Left | Edges.Top // qmllint disable missing-type
+    anchor.gravity: Edges.Right | Edges.Bottom // qmllint disable missing-type
 
     Timer {
         id: hideTimer
 
         interval: 1500
-        onTriggered: root.visibleState = false
+        onTriggered: root.shown = false
     }
 
     Rectangle {
@@ -65,11 +60,11 @@ PanelWindow {
         border.color: Theme.borderStrong
         border.width: 1
         radius: Theme.scaledSize(10)
-        opacity: root.visibleState ? 1.0 : 0.0
+        opacity: root.shown ? 1.0 : 0.0
 
         Behavior on opacity {
             NumberAnimation {
-                duration: root.visibleState ? 120 : 260
+                duration: root.shown ? 120 : 260
                 easing.type: Easing.OutCubic
             }
         }

@@ -1238,6 +1238,15 @@ ShellRoot {
         model: Quickshell.screens
 
         BrightnessOsd {
+            required property var modelData
+
+            panelWindow: {
+                const panels = panelVariants.instances;
+                for (let i = 0; i < panels.length; i++) {
+                    if (panels[i].screen === modelData) return panels[i];
+                }
+                return null;
+            }
         }
     }
 }
