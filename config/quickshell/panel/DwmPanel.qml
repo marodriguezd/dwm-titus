@@ -241,6 +241,41 @@ PanelWindow {
                     }
 
                     PanelPill {
+                        id: displayPill
+                        Layout.preferredWidth: displayRow.implicitWidth + Theme.compactWidgetHorizontalPadding * 2
+                        Layout.preferredHeight: Theme.compactWidgetSize
+                        hovered: displayMouse.containsMouse
+
+                        RowLayout {
+                            id: displayRow
+                            anchors.centerIn: parent
+                            spacing: Theme.compactSpacing
+
+                            IconText {
+                                text: "󰍹"
+                                color: Theme.textStrong
+                                font.pixelSize: Math.round((Theme.panelIconFontSize + 1) * 1.0)
+                            }
+
+                            UiText {
+                                text: root.controlsModel.refreshRateText
+                                color: Theme.textStrong
+                                font.pixelSize: Theme.panelFontSize
+                            }
+                        }
+
+                        MouseArea {
+                            id: displayMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                root.controlsModel.toggleRefreshRate();
+                            }
+                        }
+                    }
+
+                    PanelPill {
                         visible: root.panelSettingsModel.widgetEnabled("bluetooth")
                         Layout.preferredWidth: bluetoothRow.implicitWidth + Theme.compactWidgetHorizontalPadding * 2
                         Layout.preferredHeight: Theme.compactWidgetSize
@@ -392,6 +427,15 @@ PanelWindow {
         anchorWindow: root
         anchorItem: batteryPill
         label: root.powerModel.batteryPercent.toString() + "% - " + root.powerModel.batteryStatus
+        anchorY: Theme.panelHeight
+        rightAligned: true
+    }
+
+    PanelTooltip {
+        visible: displayMouse.containsMouse
+        anchorWindow: root
+        anchorItem: displayPill
+        label: "Frecuencia: " + root.controlsModel.refreshRateText + " (clic para alternar)"
         anchorY: Theme.panelHeight
         rightAligned: true
     }

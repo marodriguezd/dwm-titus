@@ -120,6 +120,37 @@ ClickAwayPopup {
                 }
             }
 
+            PanelSeparator {}
+
+            SectionLabel {
+                label: "Display"
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: root.rowSpacing
+
+                Text {
+                    Layout.fillWidth: true
+                    text: "Refresh Rate"
+                    color: Theme.text
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.panelFontSize
+                    font.bold: true
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                ControlsActionButton {
+                    Layout.preferredWidth: 105
+                    Layout.preferredHeight: root.actionButtonHeight
+                    label: root.controlsModel.refreshRateText
+                    enabled: !root.controlsModel.busy && !root.controlsModel.refreshRateBusy
+                    onActivated: root.controlsModel.toggleRefreshRate()
+                }
+            }
+
+            PanelSeparator {}
+
             SectionLabel {
                 label: "Output"
             }

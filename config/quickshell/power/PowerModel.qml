@@ -495,9 +495,20 @@ Scope {
             root.runAction("power-lock-timeout", [seconds.toString()], origin);
     }
 
+    Process {
+        id: autoRefreshRateProcess
+        command: ["/home/marodriguezd/.local/bin/dwm-refresh-rate", "auto"]
+        running: false
+    }
+
     Connections {
         target: UPower
-        function onOnBatteryChanged() { root.updateNativeBattery(); }
+        function onOnBatteryChanged() {
+            root.updateNativeBattery();
+            if (!autoRefreshRateProcess.running) {
+                autoRefreshRateProcess.running = true;
+            }
+        }
     }
 
     Connections {

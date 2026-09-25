@@ -340,6 +340,13 @@ resume_theme_preview
 # screen blanking and DPMS disabled to avoid known GPU/display wake issues.
 apply_power_settings
 
+# Apply display refresh rate profile based on power source (AC 144Hz, battery 60Hz)
+if command -v dwm-refresh-rate >/dev/null 2>&1; then
+	dwm-refresh-rate auto 1 >/dev/null 2>&1 || true
+elif [ -x "$HOME/.local/bin/dwm-refresh-rate" ]; then
+	"$HOME/.local/bin/dwm-refresh-rate" auto 1 >/dev/null 2>&1 || true
+fi
+
 # Reapply persisted per-device input settings after X11 is ready. The helper
 # resolves each stable device identity again, so enumeration changes cannot
 # redirect a saved setting to a different device.

@@ -29,6 +29,9 @@ Scope {
     property string mediaArtist: ""
     property string mediaTitle: ""
     property string bluetoothText: "BT unavailable"
+    property string refreshRateText: "144Hz"
+    property int refreshRate: 144
+    property bool refreshRateBusy: false
     property string message: ""
     property string audioProviderState: "idle"
     property string audioProviderDetail: ""
@@ -124,9 +127,22 @@ Scope {
         }
     }
 
+    function refreshDisplayRate() {
+        if (!refreshRateStatusProcess.running) {
+            refreshRateStatusProcess.running = true;
+        }
+    }
+
+    function toggleRefreshRate() {
+        if (root.refreshRateBusy) return;
+        root.refreshRateBusy = true;
+        refreshRateToggleProcess.running = true;
+    }
+
     function refresh() {
         root.refreshAudioStatus();
         root.refreshAudioInventory();
+        root.refreshDisplayRate();
         if (!mediaStatusProcess.running) {
             mediaStatusProcess.running = true;
         }
@@ -607,5 +623,44 @@ Scope {
         }
     }
 
-    Component.onCompleted: root.refreshAudioStatus()
+    Process {
+        id: refreshRateStatusProcess
+        command: ["/home/marodriguezd/.local/bin/dwm-refresh-rate", "get"]
+        running: false
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const rate = this.text.trim();
+                if (rate === "60" || rate === "144") {
+                    root.refreshRate = parseInt(rate, 10);
+                    root.refreshRateText = rate + "Hz";
+                }
+            }
+        }
+    }
+
+    Process {
+        id: refreshRateToggleProcess
+        command: ["/home/marodriguezd/.local/bin/dwm-refresh-rate", "toggle"]
+        running: false
+
+        onRunningChanged: {
+            if (!running) {
+                root.refreshRateBusy = false;
+                root.refreshDisplayRate();
+            }
+        }
+    }
+
+    Timer {
+        interval: 3000
+        running: true
+        repeat: true
+        onTriggered: root.refreshDisplayRate()
+    }
+
+    Component.onCompleted: {
+        root.refreshAudioStatus();
+        root.refreshDisplayRate();
+    }
 }
