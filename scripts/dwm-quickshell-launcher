@@ -402,6 +402,11 @@ launch_app() {
 		return 0
 	fi
 
+	if command -v gio >/dev/null 2>&1; then
+		launch_background gio launch "$file"
+		return 0
+	fi
+
 	if command -v gtk-launch >/dev/null 2>&1; then
 		launch_background gtk-launch "$(desktop_id "$file")"
 		return 0
