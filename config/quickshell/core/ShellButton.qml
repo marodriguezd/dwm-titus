@@ -1,4 +1,6 @@
 import QtQuick
+import Quickshell
+import Quickshell.Widgets
 import qs.core
 
 Rectangle {
@@ -9,11 +11,12 @@ Rectangle {
     property bool danger: false
     property bool primary: false
     property bool compact: true
+    property string icon: ""
     property bool hovered: buttonMouse.containsMouse
 
     signal activated
 
-    implicitWidth: buttonLabel.implicitWidth + (Theme.controlPaddingX * 2)
+    implicitWidth: buttonLabel.implicitWidth + (buttonIcon.width > 0 ? buttonIcon.width + 6 : 0) + (Theme.controlPaddingX * 2)
     implicitHeight: Theme.controlHeight
     activeFocusOnTab: root.enabled
     Accessible.role: Accessible.Button
@@ -44,19 +47,35 @@ Rectangle {
         }
     }
 
-    Text {
-        id: buttonLabel
-
+    Row {
         anchors.centerIn: parent
-        text: root.label
-        color: !root.enabled ? Theme.controlDisabledText
-            : root.danger ? (root.hovered ? Theme.controlHoverText : Theme.readableText(Theme.textStrong, Theme.controlNormalFill))
-            : root.primary ? (root.hovered ? Theme.accentHoverText : Theme.accentText)
-            : root.hovered ? Theme.controlHoverText : Theme.controlNormalText
-        font.family: Theme.fontFamily
-        font.pixelSize: root.compact ? Theme.fontBodySmallSize : Theme.fontBodySize
-        font.bold: true
-        elide: Text.ElideRight
+        spacing: 6
+
+        IconImage {
+            id: buttonIcon
+
+            anchors.verticalCenter: parent.verticalCenter
+            width: 16
+            height: 16
+            visible: root.icon !== ""
+            source: root.icon !== "" ? Quickshell.iconPath(root.icon, true) : ""
+            opacity: root.enabled ? 1.0 : 0.5
+        }
+
+        Text {
+            id: buttonLabel
+
+            anchors.verticalCenter: parent.verticalCenter
+            text: root.label
+            color: !root.enabled ? Theme.controlDisabledText
+                : root.danger ? (root.hovered ? Theme.controlHoverText : Theme.readableText(Theme.textStrong, Theme.controlNormalFill))
+                : root.primary ? (root.hovered ? Theme.accentHoverText : Theme.accentText)
+                : root.hovered ? Theme.controlHoverText : Theme.controlNormalText
+            font.family: Theme.fontFamily
+            font.pixelSize: root.compact ? Theme.fontBodySmallSize : Theme.fontBodySize
+            font.bold: true
+            elide: Text.ElideRight
+        }
     }
 
     MouseArea {

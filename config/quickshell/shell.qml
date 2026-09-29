@@ -10,6 +10,7 @@ import qs.controlcenter
 import qs.controls
 import qs.core
 import qs.defaults
+import qs.gallery
 import qs.health
 import qs.launcher
 import qs.network
@@ -46,6 +47,7 @@ ShellRoot {
         if (popupId !== "bluetooth") bluetoothModel.close();
         if (popupId !== "controlcenter") controlCenterModel.close();
         if (popupId !== "controls") controlsModel.close();
+        if (popupId !== "gallery") galleryModel.close();
         if (popupId !== "network") networkModel.close();
         if (popupId !== "power") powerMenuModel.close("panel");
         root.selectedPanelWindow = panel;
@@ -122,6 +124,10 @@ ShellRoot {
         onVisibleChanged: {
             if (visible) commandMenuModel.close();
         }
+    }
+
+    GalleryModel {
+        id: galleryModel
     }
 
     CommandMenuModel {
@@ -279,6 +285,26 @@ ShellRoot {
 
         function toggle(): void {
             launcherModel.toggle();
+        }
+    }
+
+    IpcHandler {
+        target: "gallery"
+
+        function open(): void {
+            galleryModel.open();
+        }
+
+        function close(): void {
+            galleryModel.close();
+        }
+
+        function toggle(): void {
+            galleryModel.toggle();
+        }
+
+        function count(): int {
+            return galleryModel.filteredItems().length;
         }
     }
 
@@ -1126,6 +1152,10 @@ ShellRoot {
         launcherModel: launcherModel
     }
 
+    GalleryWindow {
+        galleryModel: galleryModel
+    }
+
     CommandMenuWindow {
         commandMenuModel: commandMenuModel
     }
@@ -1158,6 +1188,7 @@ ShellRoot {
             state: dwmState
             clock: clock
             networkModel: networkModel
+            galleryModel: galleryModel
             controlsModel: controlsModel
             bluetoothModel: bluetoothModel
             controlCenterModel: controlCenterModel
