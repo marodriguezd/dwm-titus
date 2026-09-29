@@ -404,6 +404,15 @@ case $session_executable in
 			export PATH
 			;;
 		esac
+		if [ -d "$HOME/.local/bin" ]; then
+			case $PATH in
+			"$HOME/.local/bin:"*) ;;
+			*)
+				PATH="$HOME/.local/bin:$PATH"
+				export PATH
+				;;
+			esac
+		fi
 	fi
 	;;
 esac

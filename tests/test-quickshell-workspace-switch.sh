@@ -78,4 +78,14 @@ PATH="$work/empty" /bin/sh "$state" focus 0x1400003 \
 test "$status" -eq 127
 grep -q 'xdotool' "$work/err"
 
+# Commands singleton must expose stateHelperCommand with preferManaged enabled.
+grep -Fq 'function stateHelperCommand(action, args)' "$repo_dir/config/quickshell/core/Commands.qml"
+grep -Fq 'helperCommand("dwm-quickshell-state", action, args, true)' "$repo_dir/config/quickshell/core/Commands.qml"
+
+# DwmState must route state helpers through Commands to respect managed script precedence.
+grep -Fq 'import qs.core' "$repo_dir/config/quickshell/state/DwmState.qml"
+grep -Fq 'Commands.stateHelperCommand("switch"' "$repo_dir/config/quickshell/state/DwmState.qml"
+grep -Fq 'Commands.stateHelperCommand("focus"' "$repo_dir/config/quickshell/state/DwmState.qml"
+grep -Fq 'Commands.stateHelperCommand("watch"' "$repo_dir/config/quickshell/state/DwmState.qml"
+
 printf '%s\n' 'Quickshell workspace switch fallback: PASS'

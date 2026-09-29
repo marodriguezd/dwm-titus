@@ -167,4 +167,8 @@ Singleton {
     function accessibilitySettingsCommand(action, args) {
         return helperCommand("dwm-accessibility-settings", action, args, true);
     }
+
+    function stateHelperCommand(action, args) {
+        return helperCommand("dwm-quickshell-state", action, args, true);
+    }
 }

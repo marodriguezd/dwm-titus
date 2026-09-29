@@ -1,5 +1,6 @@
 import Quickshell
 import Quickshell.Io
+import qs.core
 
 Scope {
     id: root
@@ -230,17 +231,19 @@ Scope {
     }
 
     function switchWorkspace(index) {
-        switchWorkspaceProcess.command = ["dwm-quickshell-state", "switch", index.toString()];
+        switchWorkspaceProcess.running = false;
+        switchWorkspaceProcess.command = Commands.stateHelperCommand("switch", [index.toString()]);
         switchWorkspaceProcess.running = true;
     }
 
     function focusWindow(windowId) {
-        focusWindowProcess.command = ["dwm-quickshell-state", "focus", windowId];
+        focusWindowProcess.running = false;
+        focusWindowProcess.command = Commands.stateHelperCommand("focus", [windowId]);
         focusWindowProcess.running = true;
     }
 
     Process {
-        command: ["dwm-quickshell-state", "watch"]
+        command: Commands.stateHelperCommand("watch", [])
         running: true
 
         stdout: SplitParser {
@@ -254,14 +257,14 @@ Scope {
     Process {
         id: switchWorkspaceProcess
 
-        command: ["dwm-quickshell-state", "switch", root.currentWorkspace.toString()]
+        command: Commands.stateHelperCommand("switch", [root.currentWorkspace.toString()])
         running: false
     }
 
     Process {
         id: focusWindowProcess
 
-        command: ["dwm-quickshell-state", "focus", "0"]
+        command: Commands.stateHelperCommand("focus", ["0"])
         running: false
     }
 }
