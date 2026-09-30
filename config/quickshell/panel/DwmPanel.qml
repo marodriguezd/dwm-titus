@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Widgets
 import qs.core
 
 pragma ComponentBehavior: Bound
@@ -32,6 +33,7 @@ PanelWindow {
     required property var state
     required property var clock
     required property var networkModel
+    required property var galleryModel
     required property var controlsModel
     required property var bluetoothModel
     required property var controlCenterModel
@@ -334,6 +336,36 @@ PanelWindow {
                             onClicked: {
                                 root.popupRequested(root, "network");
                                 root.networkModel.toggle();
+                            }
+                        }
+                    }
+
+                    PanelPill {
+                        Layout.preferredWidth: galleryRow.implicitWidth + Theme.compactWidgetHorizontalPadding * 2
+                        Layout.preferredHeight: Theme.compactWidgetSize
+                        active: root.galleryModel.visible
+                        hovered: galleryMouse.containsMouse
+
+                        RowLayout {
+                            id: galleryRow
+                            anchors.centerIn: parent
+                            spacing: Theme.compactSpacing
+
+                            IconImage {
+                                implicitWidth: 17
+                                implicitHeight: 17
+                                source: Quickshell.iconPath("we-wallpaper-symbolic", true)
+                            }
+                        }
+
+                        MouseArea {
+                            id: galleryMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                root.popupRequested(root, "gallery");
+                                root.galleryModel.toggle();
                             }
                         }
                     }
