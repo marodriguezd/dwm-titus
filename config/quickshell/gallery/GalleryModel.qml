@@ -33,10 +33,10 @@ Scope {
     property string selectedId: ""
     property var props: []
     property var pendingEdits: ({})
-    // Power panel: pending values (0/empty = auto/none), applied via applyPower()
+    // Power panel: nativo 24 AC / 15 bateria, aplicado via applyPower(). 0/auto solo si el usuario lo elige.
     property string powerProfile: ""
-    property int powerAcFps: 0
-    property int powerBattFps: 10
+    property int powerAcFps: 24
+    property int powerBattFps: 15
     property bool powerPauseOnBatt: false
     property int powerIdleMin: 0
     property bool powerLoaded: false
@@ -486,8 +486,8 @@ Scope {
         return root.backendDetected;
     }
 
-    readonly property var acFpsSteps: [0, 15, 30, 60, 120, 144]
-    readonly property var battFpsSteps: [5, 10, 15, 30]
+    readonly property var acFpsSteps: [0, 15, 24, 30, 60, 120, 144]
+    readonly property var battFpsSteps: [0, 5, 10, 15, 24, 30]
     readonly property var idleMinSteps: [0, 5, 10, 15, 30, 60]
     readonly property var hwdecSteps: ["auto", "vaapi-copy", "vaapi", "nvdec", "no"]
     readonly property var layerSteps: ["background", "bottom", "top", "overlay"]
@@ -503,7 +503,7 @@ Scope {
     function stepAcFps(dir : int) : void {
         let i = root.acFpsSteps.indexOf(root.powerAcFps);
         if (i === -1) {
-            i = 0;
+            i = root.acFpsSteps.indexOf(24);
         }
         i = Math.max(0, Math.min(root.acFpsSteps.length - 1, i + dir));
         root.powerAcFps = root.acFpsSteps[i];
@@ -512,10 +512,23 @@ Scope {
     function stepBattFps(dir : int) : void {
         let i = root.battFpsSteps.indexOf(root.powerBattFps);
         if (i === -1) {
-            i = 1;
+            i = root.battFpsSteps.indexOf(15);
         }
         i = Math.max(0, Math.min(root.battFpsSteps.length - 1, i + dir));
         root.powerBattFps = root.battFpsSteps[i];
+    }
+
+    function battFpsLabel() : string {
+        return root.powerBattFps <= 0 ? "pausa" : String(root.powerBattFps);
+    }
+
+    function resetPower() : void {
+        root.powerProfile = "";
+        root.powerAcFps = 24;
+        root.powerBattFps = 15;
+        root.powerPauseOnBatt = false;
+        root.powerIdleMin = 0;
+        root.applyPower();
     }
 
     function stepIdleMin(dir : int) : void {
@@ -649,11 +662,15 @@ Scope {
                     if (k === "WE_PROFILE") {
                         root.powerProfile = (v === "lite" || v === "balanced" || v === "full") ? v : "";
                     } else if (k === "WE_FPS") {
-                        const n = parseInt(v, 10);
-                        root.powerAcFps = isNaN(n) ? 0 : n;
+                        if (v === "") {
+                            root.powerAcFps = 0;
+                        } else {
+                            const n = parseInt(v, 10);
+                            root.powerAcFps = isNaN(n) ? 24 : n;
+                        }
                     } else if (k === "WE_FPS_BATTERY") {
                         const n = parseInt(v, 10);
-                        root.powerBattFps = isNaN(n) ? 10 : n;
+                        root.powerBattFps = isNaN(n) ? 15 : n;
                     } else if (k === "WE_PAUSE_ON_BATTERY") {
                         root.powerPauseOnBatt = (v === "1");
                     } else if (k === "WE_IDLE_PAUSE") {

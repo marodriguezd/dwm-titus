@@ -323,7 +323,7 @@ FloatingWindow {
 
                         UiText {
                             Layout.preferredWidth: 40
-                            text: String(root.galleryModel.powerBattFps)
+                            text: root.galleryModel.battFpsLabel()
                         }
 
                         ShellButton {
@@ -365,7 +365,7 @@ FloatingWindow {
                     UiText {
                         Layout.fillWidth: true
                         color: Theme.menuMutedText
-                        text: "Apply guarda y reaplica el fondo actual. Un export en el entorno gana al fichero."
+                        text: "Nativo 24/15. Apply guarda y reaplica. 0=auto, 0 en bateria=pausa. Un export gana al fichero."
                     }
                 }
             }
@@ -930,9 +930,14 @@ FloatingWindow {
                         }
 
                         ShellButton {
+                            label: "Reset 24/15"
+                            onActivated: root.galleryModel.resetPower()
+                        }
+
+                        ShellButton {
                             label: "Apply"
                             primary: true
-                            onActivated: root.galleryModel.applySelected()
+                            onActivated: root.galleryModel.applyPower()
                         }
                     }
 
