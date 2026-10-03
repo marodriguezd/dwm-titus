@@ -7,6 +7,10 @@ Rectangle {
     id: root
 
     required property string label
+    property url leadingIcon: ""
+    property real leadingIconSize: Theme.fontBodySmallSize
+    property string leadingLabel: ""
+    property real labelSpacing: 0
     property string accessibleDescription: ""
     property bool danger: false
     property bool primary: false
@@ -16,7 +20,7 @@ Rectangle {
 
     signal activated
 
-    implicitWidth: buttonLabel.implicitWidth + (buttonIcon.width > 0 ? buttonIcon.width + 6 : 0) + (Theme.controlPaddingX * 2)
+    implicitWidth: buttonContent.implicitWidth + (Theme.controlPaddingX * 2)
     implicitHeight: Theme.controlHeight
     activeFocusOnTab: root.enabled
     Accessible.role: Accessible.Button
@@ -48,24 +52,45 @@ Rectangle {
     }
 
     Row {
+        id: buttonContent
+
         anchors.centerIn: parent
-        spacing: 6
+        spacing: root.icon !== "" ? 6
+            : (root.leadingIcon.toString().length > 0 || root.leadingLabel.length > 0)
+            && root.label.length > 0 ? root.labelSpacing : 0
 
         IconImage {
             id: buttonIcon
 
             anchors.verticalCenter: parent.verticalCenter
-            width: 16
+            width: root.icon !== "" ? 16 : 0
             height: 16
             visible: root.icon !== ""
             source: root.icon !== "" ? Quickshell.iconPath(root.icon, true) : ""
             opacity: root.enabled ? 1.0 : 0.5
         }
 
+        Image {
+            visible: root.leadingIcon.toString().length > 0
+            width: visible ? root.leadingIconSize : 0
+            height: visible ? root.leadingIconSize : 0
+            source: root.leadingIcon
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+        }
+
+        Text {
+            visible: root.leadingIcon.toString().length === 0 && root.leadingLabel.length > 0
+            text: root.leadingLabel
+            color: buttonLabel.color
+            font: buttonLabel.font
+        }
+
         Text {
             id: buttonLabel
 
             anchors.verticalCenter: parent.verticalCenter
+            visible: root.label.length > 0
             text: root.label
             color: !root.enabled ? Theme.controlDisabledText
                 : root.danger ? (root.hovered ? Theme.controlHoverText : Theme.readableText(Theme.textStrong, Theme.controlNormalFill))
