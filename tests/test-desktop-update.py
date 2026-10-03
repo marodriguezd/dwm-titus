@@ -731,7 +731,25 @@ class DesktopUpdate(unittest.TestCase):
         self.assertFalse((self.data.parent / (".dwm-update-" + "f" * 32 + "-0")).exists())
         with patch.object(update, "run", REAL_RUN), patch.object(update, "SOURCE", str(source)):
             self.assertIn("divergent", update.checkout_ancestry_reason(self.data, git(source, "rev-parse", "HEAD")))
+            self.assertEqual(update.checkout_ancestry_reason(self.data, original), "local-ahead")
             self.assertEqual(update.checkout_ancestry_reason(source, git(source, "rev-parse", "HEAD")), "")
+
+    def test_local_ahead_checkout_reports_current(self):
+        with patch.object(update, "checkout_ancestry_reason", return_value="local-ahead"):
+            value = update.check(True)
+        self.assertEqual(value["state"], "current")
+        self.assertFalse(value["canUpdate"])
+        self.assertEqual(value["available"], value["installed"])
+        self.assertEqual(value["changes"], [])
+        self.assertIn("ahead of upstream", value["detail"])
+
+    def test_local_ahead_checkout_with_drift_stays_blocked(self):
+        with patch.object(update, "checkout_ancestry_reason", return_value="local-ahead"), \
+                patch.object(update, "drift", return_value=[str(self.binary)]):
+            value = update.check(True)
+        self.assertEqual(value["state"], "blocked")
+        self.assertFalse(value["canUpdate"])
+        self.assertIn("need syncing", value["detail"])
 
     def test_external_checkout_ancestry_blocks_preview(self):
         external = self.base / "external"

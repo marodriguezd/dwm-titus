@@ -675,11 +675,19 @@ def checkout_ancestry_reason(path, revision):
         run(["git", "-C", repository, "fetch", "--no-tags", SOURCE, revision + ":refs/heads/upstream"], timeout=30)
         try:
             run(["git", "-C", repository, "merge-base", "--is-ancestor", "refs/heads/local", "refs/heads/upstream"])
+            return ""
+        except CommandFailure as error:
+            if error.returncode != 1:
+                raise
+        try:
+            run(["git", "-C", repository, "merge-base", "--is-ancestor", "refs/heads/upstream", "refs/heads/local"])
         except CommandFailure as error:
             if error.returncode != 1:
                 raise
             return "Local source has divergent history. Use the source installer."
-    return ""
+        # The checkout already contains upstream main, so no upstream revision is
+        # left to fast-forward to. Report it separately from real divergence.
+        return "local-ahead"
 
 
 def root_owned(path):
@@ -800,6 +808,18 @@ def check_bounded(force=False):
                     reason = checkout_ancestry_reason(path, value["available"])
                     if reason:
                         break
+            if reason == "local-ahead":
+                repair = bool(value["changes"] or value["packages"])
+                if not repair:
+                    # A managed fork that already contains upstream main has no
+                    # upstream update to apply. Report it as current instead of
+                    # advertising a pending desktop update that cannot apply.
+                    value["available"] = value["installed"]
+                    return save_status(state, value, state="current", canUpdate=False, checkedAt=int(time.time()),
+                                       detail="Local source is ahead of upstream main. Install future desktop "
+                                              "updates with the source workflow.")
+                reason = ("Local source is ahead of upstream main and managed files need syncing. "
+                          "Use the source installer.")
             if reason:
                 return save_status(state, value, state="blocked", detail=reason, checkedAt=int(time.time()))
             available = upstream[0] != value["installed"]

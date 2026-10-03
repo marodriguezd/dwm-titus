@@ -113,7 +113,11 @@ Git checkout, the updater prepares and validates a fast-forwarded copy before
 replacing it. Unrelated files in that directory are retained. Development
 branches, tracked or untracked changes, ignored files inside `config` or
 `scripts`, linked worktrees, and divergent history are blocked
-with instructions to use the source workflow.
+with instructions to use the source workflow. A checkout that already contains
+upstream `main`, such as a managed fork carrying additional local commits, has
+no upstream revision left to fast-forward to. It is reported as up to date
+instead of a pending update, and it stays blocked while managed files still
+need syncing.
 
 The installed manifest fixes the installation roots. Updates can add files in
 the desktop-owned namespaces for dwm-prefixed commands/helpers, Dwm themes and
