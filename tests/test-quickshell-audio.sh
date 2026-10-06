@@ -11,6 +11,7 @@ settings=$repo/config/quickshell/settings/SettingsModel.qml
 shell=$repo/config/quickshell/shell.qml
 
 grep -Fq 'property int audioSourceGeneration: 0' "$model"
+grep -Fq 'readonly property bool useNativeAudioProvider: false' "$model"
 grep -Fq 'property int mutationGeneration: 0' "$model"
 grep -Fq 'property int appliedMutationGeneration: 0' "$model"
 grep -Fq 'root.actionProcessGeneration !== root.mutationGeneration' "$model"
@@ -21,7 +22,8 @@ grep -Fq 'root.fallbackProcessGeneration === root.audioSourceGeneration' "$model
 grep -Fq 'fallbackRestartTimer.restart()' "$model"
 grep -Fq 'if (fallbackWatchProcess.running) fallbackWatchProcess.running = false;' "$model"
 [ "$(grep -Fc 'Commands.controlsHelperCommand("audio-watch")' "$model")" -eq 1 ]
-if grep -Fq 'repeat: true' "$model"; then
+audio_provider=$(sed -n '/id: nativeGraceTimer/,/id: volumeStatusProcess/p' "$model")
+if printf '%s\n' "$audio_provider" | grep -Fq 'repeat: true'; then
 	exit 1
 fi
 grep -Fq 'function parseAudioSnapshot(text)' "$model"

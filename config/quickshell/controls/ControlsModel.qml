@@ -42,6 +42,8 @@ Scope {
     property int appliedMutationGeneration: 0
     property int actionProcessGeneration: 0
     property string mutationOrigin: ""
+    // Quickshell 0.2.1 has a routeDevice bug; keep audio routing on the pactl fallback.
+    readonly property bool useNativeAudioProvider: false
     readonly property var audioSink: Pipewire.defaultAudioSink
     readonly property var audioSource: Pipewire.defaultAudioSource
 
@@ -50,7 +52,7 @@ Scope {
     }
 
     function selectAudioSource() {
-        if (root.nativeAudioReady()) {
+        if (root.useNativeAudioProvider && root.nativeAudioReady()) {
             nativeGraceTimer.stop();
             if (fallbackWatchProcess.running) fallbackWatchProcess.running = false;
             if (root.audioSourceKind !== "native") {
@@ -467,7 +469,8 @@ Scope {
         interval: 3000
         repeat: false
         onTriggered: {
-            if (!root.nativeAudioReady() && (root.visible || root.settingsVisible)) {
+            if ((!root.useNativeAudioProvider || !root.nativeAudioReady())
+                    && (root.visible || root.settingsVisible)) {
                 root.audioSourceGeneration++;
                 root.audioSourceKind = "fallback";
                 root.fallbackProcessGeneration = root.audioSourceGeneration;
