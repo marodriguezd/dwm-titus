@@ -85,6 +85,9 @@ The installed session must provide:
 - Window swallowing.
 - Per-client size factors and stack reordering.
 - Real and fake fullscreen behavior.
+- Unmanaged overlays explicitly matched by an `alwaysontop=1` runtime rule
+  appear above real fullscreen clients without becoming managed or taking focus.
+  Ordinary shell popups and EWMH above hints retain their existing priority.
 - Window icons from `_NET_WM_ICON`.
 - Configured border suppression and cursor-warp behavior.
 - Stable handling of applications that omit optional X properties.
@@ -385,9 +388,18 @@ be validated against the supported Fedora release.
 Runtime dependencies are classified as:
 
 - Core: an X11 server/session, D-Bus session support, one usable terminal
-  emulator, and the tools required by configured core keybindings. Alacritty
-  is the preferred emulator, with the existing supported-terminal fallback
-  chain retained when Alacritty is unavailable.
+  emulator, the GNOME Keyring packages for credential storage
+  (`gnome-keyring` and `gnome-keyring-pam`), and the tools required by configured
+  core keybindings. Alacritty is the preferred emulator, with the existing
+  supported-terminal fallback chain retained when Alacritty is unavailable.
+  Source synchronization must reconcile the keyring pair even without
+  Quickshell installed, while keeping desktop-only update dependencies gated
+  on Quickshell. Dependency diagnostics must report a missing daemon or PAM
+  package and offer the installer repair path. Automatic keyring unlock at
+  password login also requires the display manager's PAM stack to load
+  `pam_gnome_keyring.so` and matching account/keyring passwords. Installing the
+  package pair does not configure PAM services. Autologin and `startx` do not
+  supply a password to this PAM path.
 - Recommended desktop: Alacritty, Quickshell, Picom, Feh, Dex, a polkit agent,
   notification tools, audio controls, screenshot tooling, Nerd/emoji fonts,
   Flatpak with its GTK portal, the Phase 6 system-management runtime
