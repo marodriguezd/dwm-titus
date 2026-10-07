@@ -41,6 +41,7 @@ Scope {
     property int mutationGeneration: 0
     property int appliedMutationGeneration: 0
     property int actionProcessGeneration: 0
+    property int pendingVolumePercent: -1
     property string mutationOrigin: ""
     // Quickshell 0.2.1 has a routeDevice bug; keep audio routing on the pactl fallback.
     readonly property bool useNativeAudioProvider: false
@@ -112,6 +113,7 @@ Scope {
         root.visible = true;
         root.refresh();
         root.selectAudioSource();
+        root.refreshDisplayRate();
     }
 
     function close() {
@@ -358,7 +360,12 @@ Scope {
     }
 
     function volumeSet(percent) {
-        root.runAction("volume-set", [root.clampPercent(percent).toString() + "%"]);
+        const target = root.clampPercent(percent);
+        if (root.busy) {
+            root.pendingVolumePercent = target;
+            return;
+        }
+        root.runAction("volume-set", [target.toString() + "%"]);
     }
 
     function outputSetDefault(name, origin) {
@@ -610,6 +617,13 @@ Scope {
         onRunningChanged: {
             if (!running) {
                 if (root.actionProcessGeneration !== root.mutationGeneration) return;
+                if (root.pendingVolumePercent >= 0) {
+                    const target = root.pendingVolumePercent;
+                    root.pendingVolumePercent = -1;
+                    root.busy = false;
+                    root.volumeSet(target);
+                    return;
+                }
                 root.busy = false;
                 root.appliedMutationGeneration = root.mutationGeneration;
                 root.refresh();
@@ -657,7 +671,7 @@ Scope {
 
     Timer {
         interval: 3000
-        running: true
+        running: root.visible
         repeat: true
         onTriggered: root.refreshDisplayRate()
     }

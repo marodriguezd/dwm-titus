@@ -96,8 +96,21 @@ ClickAwayPopup {
                     Layout.preferredHeight: root.volumeControlHeight
                     value: root.controlsModel.volumePercent
                     muted: root.controlsModel.volumeMuted
-                    enabled: !root.controlsModel.busy
-                    onValueCommitted: value => root.controlsModel.volumeSet(Math.round(value))
+                    enabled: !root.controlsModel.busy || dragging
+                    onValueMoved: value => {
+                        if (!volumeDragTimer.running) volumeDragTimer.start();
+                    }
+                    onValueCommitted: value => {
+                        volumeDragTimer.stop();
+                        root.controlsModel.volumeSet(Math.round(value));
+                    }
+
+                    Timer {
+                        id: volumeDragTimer
+                        interval: 100
+                        repeat: true
+                        onTriggered: root.controlsModel.volumeSet(Math.round(volumeSlider.liveValue))
+                    }
                 }
 
                 Text {
