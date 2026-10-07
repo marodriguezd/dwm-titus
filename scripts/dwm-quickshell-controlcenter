@@ -1574,6 +1574,10 @@ restart_quickshell() {
 		return 1
 	fi
 
+	if command -v systemctl >/dev/null 2>&1; then
+		systemctl --user restart xdg-document-portal.service 2>/dev/null || true
+	fi
+
 	pkill -x quickshell 2>/dev/null || true
 	if command -v quickshell >/dev/null 2>&1; then
 		launch_background quickshell --no-duplicate
