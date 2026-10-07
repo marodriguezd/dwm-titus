@@ -42,6 +42,7 @@ Scope {
         const availableActions = [
             { "id": "restart-picom", "label": "Restart Picom" },
             { "id": "toggle-nightlight", "label": "Toggle Night Light" },
+            { "id": "toggle-cursor-lock", "label": "Toggle Cursor Lock" },
             { "id": "restart-quickshell", "label": "Restart Quickshell" },
             { "id": "reload-wallpaper", "label": "Reload Wallpaper" },
             { "id": "restart-networkmanager", "label": "Restart NetworkManager" },

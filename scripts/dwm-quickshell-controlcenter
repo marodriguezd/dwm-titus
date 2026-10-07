@@ -1648,12 +1648,22 @@ toggle_nightlight() {
 			echo "off:6500" > "${XDG_RUNTIME_DIR:-/tmp}/dwm-nightlight.state"
 			notify "Luz Nocturna desactivada"
 		else
-			redshift -P -O 4200 >/dev/null 2>&1 || true
-			echo "on:4200" > "${XDG_RUNTIME_DIR:-/tmp}/dwm-nightlight.state"
-			notify "Luz Nocturna activada (4200K)"
+			redshift -P -O 3800 >/dev/null 2>&1 || true
+			echo "on:3800" > "${XDG_RUNTIME_DIR:-/tmp}/dwm-nightlight.state"
+			notify "Luz Nocturna activada (3800K)"
 		fi
 	else
 		printf 'neither dwm-nightlight nor redshift is available\n' >&2
+		return 1
+	fi
+}
+
+toggle_cursor_lock() {
+	confine_helper=$(command -v cursor-lock 2>/dev/null || command -v dwm-mouse-confine 2>/dev/null || true)
+	if [ -x "$confine_helper" ] || command -v "$confine_helper" >/dev/null 2>&1; then
+		"$confine_helper" toggle
+	else
+		printf 'cursor confinement helper is unavailable\n' >&2
 		return 1
 	fi
 }
@@ -1737,6 +1747,7 @@ action() {
 	reload-wallpaper) reload_wallpaper ;;
 	toggle-compositor) toggle_compositor ;;
 	toggle-nightlight) toggle_nightlight ;;
+	toggle-cursor-lock) toggle_cursor_lock ;;
 	restart-networkmanager) restart_networkmanager ;;
 	dependency-check) dependency_check ;;
 	install-missing-deps) install_missing_deps ;;
