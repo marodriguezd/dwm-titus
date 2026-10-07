@@ -1638,6 +1638,26 @@ toggle_compositor() {
 	picom_action toggle
 }
 
+toggle_nightlight() {
+	nightlight_helper=$(command -v dwm-nightlight 2>/dev/null || printf '%s' "$repo_dir/scripts/dwm-nightlight")
+	if [ -x "$nightlight_helper" ] || command -v "$nightlight_helper" >/dev/null 2>&1; then
+		"$nightlight_helper" toggle
+	elif command -v redshift >/dev/null 2>&1; then
+		if [ -f "${XDG_RUNTIME_DIR:-/tmp}/dwm-nightlight.state" ] && grep -q '^on:' "${XDG_RUNTIME_DIR:-/tmp}/dwm-nightlight.state"; then
+			redshift -x >/dev/null 2>&1 || true
+			echo "off:6500" > "${XDG_RUNTIME_DIR:-/tmp}/dwm-nightlight.state"
+			notify "Luz Nocturna desactivada"
+		else
+			redshift -P -O 4200 >/dev/null 2>&1 || true
+			echo "on:4200" > "${XDG_RUNTIME_DIR:-/tmp}/dwm-nightlight.state"
+			notify "Luz Nocturna activada (4200K)"
+		fi
+	else
+		printf 'neither dwm-nightlight nor redshift is available\n' >&2
+		return 1
+	fi
+}
+
 restart_networkmanager() {
 	if command -v systemctl >/dev/null 2>&1; then
 		terminal_run "sudo systemctl restart NetworkManager"
@@ -1716,6 +1736,7 @@ action() {
 	restart-quickshell) restart_quickshell ;;
 	reload-wallpaper) reload_wallpaper ;;
 	toggle-compositor) toggle_compositor ;;
+	toggle-nightlight) toggle_nightlight ;;
 	restart-networkmanager) restart_networkmanager ;;
 	dependency-check) dependency_check ;;
 	install-missing-deps) install_missing_deps ;;
