@@ -368,7 +368,6 @@ TERM_C15="$(theme_get term_color15)"
 
 DARK_MODE="$(theme_get dark_mode)"
 [[ "$DARK_MODE" != "false" ]] && DARK_MODE="true" # default to dark if unset
-CURSOR_SIZE=32
 if [[ "$DARK_MODE" == "true" ]]; then
 	CURSOR_THEME="Capitaine-Cursors-White"
 else
@@ -377,6 +376,23 @@ fi
 if [[ -n $CURSOR_CHOICE && $CURSOR_CHOICE != follow-theme ]]; then
 	CURSOR_THEME=$CURSOR_CHOICE
 fi
+
+CURSOR_XRESOURCES="${XDG_CONFIG_HOME:-$HOME/.config}/dwm-titus/cursor.Xresources"
+CURSOR_SIZE="$(toml_get "appearance" "cursor_size" "$THEMES_FILE")"
+[[ -z "$CURSOR_SIZE" ]] && CURSOR_SIZE="$(theme_get cursor_size)"
+if [[ -z "$CURSOR_SIZE" && -f "$CURSOR_XRESOURCES" ]]; then
+	CURSOR_SIZE=$(awk '/^Xcursor.size:[[:space:]]*/ {print $2; exit}' "$CURSOR_XRESOURCES" 2>/dev/null || true)
+fi
+if [[ -z "$CURSOR_SIZE" ]]; then
+	if [[ "$CURSOR_THEME" == retrosmart-* ]]; then
+		CURSOR_SIZE=40
+	elif [[ "$CURSOR_THEME" == Banana* ]]; then
+		CURSOR_SIZE=43
+	else
+		CURSOR_SIZE=32
+	fi
+fi
+[[ "$CURSOR_SIZE" =~ ^[0-9]+$ ]] && (( CURSOR_SIZE >= 1 && CURSOR_SIZE <= 256 )) || CURSOR_SIZE=32
 
 gtk_theme_available() {
 	local name="$1"
